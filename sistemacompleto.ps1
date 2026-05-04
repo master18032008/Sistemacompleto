@@ -12,7 +12,7 @@ if ($host.Name -eq 'ConsoleHost') {
     }
 }
 
-# ===== SISTEMA DE ACESSO (SENHA) =====
+# ===== SISTEMA DE ACESSO (SENHA ATUALIZADA) =====
 $tentativas = 0
 $senhaCorreta = "12345"
 
@@ -97,7 +97,7 @@ function Executar-Instalacao {
         } catch {}
     }
 
-    # Extração e Configuração (Lógica do antigo .bat)
+    # Extração e Configuração
     Write-Host "Extraindo e aplicando configurações..." -ForegroundColor Cyan
     $tmp = "$env:TEMP\krayz_install_tmp"
     if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
@@ -105,11 +105,11 @@ function Executar-Instalacao {
     try {
         Expand-Archive -Path "KRAYz_STORE.zip" -DestinationPath $tmp -Force
         
-        # Limpeza de pastas de config (conforme o rmdir /s /q)
+        # Limpeza de pastas de config
         $limpar = @("$configDir\depotcache", "$configDir\stplug-in")
         foreach ($l in $limpar) { if (Test-Path $l) { Remove-Item $l -Recurse -Force -ErrorAction SilentlyContinue } }
 
-        # Cópia dos arquivos (conforme o xcopy)
+        # Cópia dos arquivos para a Steam
         if (Test-Path "$tmp\Config") {
             Copy-Item -Path "$tmp\Config\*" -Destination "$configDir\" -Recurse -Force
         }
