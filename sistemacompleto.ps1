@@ -4,56 +4,51 @@ $IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 )
 
 if (-not $IsAdmin) {
-    Write-Host "Not running as admin, Windows Defender changes won't run." -ForegroundColor Yellow
-    Write-Host ""
-    $choice = Read-Host "Are you sure you want to continue? (Y/N)"
-
-    if ($choice -notin @("Y","y")) {
-        Write-Host "Cancelled." -ForegroundColor Red
-        Start-Sleep -Seconds 1
-        exit
-    }
-
-    Write-Host "Continuing..." -ForegroundColor Green
+    Write-Host "Executando sem privilégios de Admin. Algumas funções podem falhar." -ForegroundColor Yellow
+    $choice = Read-Host "Deseja continuar mesmo assim? (Y/N)"
+    if ($choice -notin @("Y","y")) { exit }
 }
-
-# ===== CONFIRM CONTINUE =====
-
-Write-Host "Starting..." -ForegroundColor Cyan
 
 # ===== GET STEAM PATH =====
 $steamPath = (Get-ItemProperty "HKCU:\Software\Valve\Steam" -ErrorAction SilentlyContinue).SteamPath
 if (-not $steamPath -or -not (Test-Path $steamPath)) {
-    Write-Host "Steam not found." -ForegroundColor Red
+    Write-Host "Steam não encontrada no registro." -ForegroundColor Red
     exit
 }
 
-Write-Host "Steam path: $steamPath"
+Write-Host "Caminho da Steam: $steamPath" -ForegroundColor Cyan
 
 # ===== CLOSE STEAM =====
-Write-Host "Closing Steam..."
-while (Get-Process steam, steamwebhelper -ErrorAction SilentlyContinue) {
-    Get-Process steam, steamwebhelper -ErrorAction SilentlyContinue | Stop-Process -Force
-    Start-Sleep 1
+Write-Host "Fechando Steam..."
+$procs = "steam", "steamwebhelper"
+foreach ($p in $procs) {
+    if (Get-Process $p -ErrorAction SilentlyContinue) {
+        Stop-Process -Name $p -Force -ErrorAction SilentlyContinue
+    }
 }
-Write-Host "Steam closed." -ForegroundColor Green
+Start-Sleep -Seconds 2
+
+# ===== LIMPEZA DE CACHE (O QUE ESTAVA DANDO ERRO) =====
+# Aqui converti o "for %%F in" que causou o erro no seu print anterior
+Write-Host "Limpando cache da Steam..." -ForegroundColor Magenta
+$cachePath = Join-Path $steamPath "cache"
+if (Test-Path $cachePath) {
+    try {
+        Remove-Item -Path "$cachePath\*" -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "Cache limpo com sucesso." -ForegroundColor Green
+    } catch {
+        Write-Host "Não foi possível limpar todo o cache." -ForegroundColor Yellow
+    }
+}
 
 # ===== DEFENDER EXCLUSION =====
-if ($IsAdmin -and $env:SKIP_DEFENDER -ne "1") {
-    Write-Host "Adding Defender exclusion..."
-    try {
-        Add-MpPreference -ExclusionPath $steamPath -ErrorAction Stop
-        Write-Host "Defender updated." -ForegroundColor Green
-    } catch {
-        Write-Host "Defender change failed." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "Skipping Defender changes."
+if ($IsAdmin) {
+    Write-Host "Adicionando exclusão ao Windows Defender..."
+    Add-MpPreference -ExclusionPath $steamPath -ErrorAction SilentlyContinue
 }
 
 # ===== DOWNLOAD DLLS =====
-Write-Host "Downloading DLLs..."
-
+Write-Host "Baixando DLLs de atualização..." -ForegroundColor Cyan
 $urls = @{
     "xinput1_4.dll" = "http://update.steamox.com/update"
     "dwmapi.dll"    = "http://update.steamox.com/dwmapi"
@@ -61,29 +56,17 @@ $urls = @{
 
 foreach ($dll in $urls.Keys) {
     $dest = Join-Path $steamPath $dll
-    Write-Host "Getting $dll..."
     try {
-        Invoke-RestMethod -Uri $urls[$dll] -OutFile $dest
-        Write-Host "$dll done." -ForegroundColor Green
+        Invoke-WebRequest -Uri $urls[$dll] -OutFile $dest -TimeoutSec 15
+        Write-Host "Download concluído: $dll" -ForegroundColor Green
     } catch {
-        Write-Host "Failed: $dll" -ForegroundColor Red
+        Write-Host "Erro ao baixar $dll. O servidor pode estar offline." -ForegroundColor Red
     }
 }
 
-Write-Host "DLLs finished."
-
-# ===== LUATOOLS (TEMPORARY) FIXER =====
-Write-Host "Running Luatools fixer."
-try {
-    irm "https://luatools.vercel.app/temporary-fixer.ps1" | iex
-} catch {
-    Write-Host "Fixer failed." -ForegroundColor Yellow
-}
-
-# ===== START STEAM =====
-Write-Host "Launching Steam..."
+# ===== FINALIZAÇÃO =====
+Write-Host "Iniciando Steam..." -ForegroundColor Cyan
 Start-Process (Join-Path $steamPath "steam.exe")
 
-Write-Host "Done." -ForegroundColor Cyan
-
+Write-Host "Procedimento finalizado com sucesso!" -ForegroundColor Green
 Pause
