@@ -15,7 +15,7 @@ $Host.UI.RawUI.WindowTitle = "GameOverGod - TESTE DE REMOÇÃO EM 1 MINUTO"
 Clear-Host
 
 # --- CONFIGURAÇÃO DO SERVIDOR ---
-$urlDasKeys = "https://raw.githubusercontent.com/master18032008/Sistemacompleto/Principal/keys.txt"
+$urlDasKeys = "https://raw.githubusercontent.com/master18032008/Sistemacompleto/refs/heads/main/keys.txt"
 $pathTrava = "$env:APPDATA\gog_teste_v7.dat"
 
 # --- LOGIN E VALIDAÇÃO ---
