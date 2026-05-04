@@ -1,7 +1,7 @@
 # ===== CONFIGURACAO DE AMBIENTE E CODIFICACAO =====
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$Host.UI.RawUI.WindowTitle = "GameOverGod - Gestao de Elite v4.1"
+$Host.UI.RawUI.WindowTitle = "GameOverGod - Gestao de Elite v4.2"
 Clear-Host
 
 # Ativar suporte a cores ANSI no console
@@ -22,7 +22,7 @@ while ($tentativas -lt 3) {
     Write-Host "----------------------------------------" -ForegroundColor Magenta
     
     if ($inputSenha -eq $senhaCorreta) {
-        Write-Host "Acesso autorizado! Bem-vindo, Cliente." -ForegroundColor Green
+        Write-Host "Acesso autorizado! Bem-vindo, cliente." -ForegroundColor Green
         Start-Sleep -Milliseconds 800
         break
     } else {
