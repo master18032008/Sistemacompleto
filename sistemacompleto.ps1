@@ -15,7 +15,7 @@ $Host.UI.RawUI.WindowTitle = "GameOverGod - TESTE DE INSTALAÇÃO E AUTO-REMOÇ�
 Clear-Host
 
 # --- CONFIGURAÇÕES DE DIRETÓRIO E LINKS ---
-$urlDasKeys = "https://raw.githubusercontent.com/master18032008/Sistemacompleto/Principal/keys.txt"
+$urlDasKeys = "https://raw.githubusercontent.com/master18032008/Sistemacompleto/refs/heads/main/keys.txt"
 $urlDoRar = "https://cdn.discordapp.com/attachments/1500928090619121826/1500940141643173968/GameOverGod.rar?ex=69fa42ef&is=69f8f16f&hm=9467ea98343ec2c9e19cc24941085ef0485d9b857a0788de97ac1b996a0e0e8f&"
 $pathTrava = "$env:APPDATA\gog_teste_final.dat"
 
