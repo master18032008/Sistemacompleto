@@ -14,7 +14,7 @@ if ($host.Name -eq 'ConsoleHost') {
 
 # ===== SISTEMA DE ACESSO (SENHA) =====
 $tentativas = 0
-$senhaCorreta = "1234"
+$senhaCorreta = "12345"
 
 while ($tentativas -lt 3) {
     Write-Host "----------------------------------------" -ForegroundColor Magenta
