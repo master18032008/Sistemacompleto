@@ -1,15 +1,10 @@
-# =====================================================================
-# GAME OVER GOD - GESTÃO DE ELITE V4.2
-# CEO: Marcos - Game Over
-# =====================================================================
-
-# ===== CONFIGURACAO DE AMBIENTE E CODIFICACAO =====
+# ===== CONFIGURAÇÃO DE AMBIENTE E CODIFICAÇÃO =====
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$Host.UI.RawUI.WindowTitle = "GameOverGod - Gestao de Elite v4.2"
+$Host.UI.RawUI.WindowTitle = "Game Over - Gestão de Biblioteca v3.0 (PLANO PRO)"
 Clear-Host
 
-# Ativar suporte a cores ANSI no console
+# Ativar suporte a cores ANSI no console para evitar letras bugadas
 if ($host.Name -eq 'ConsoleHost') {
     $mode = Get-ItemProperty -Path "HKCU:\Console" -Name "VirtualTerminalLevel" -ErrorAction SilentlyContinue
     if (-not $mode) {
@@ -17,11 +12,35 @@ if ($host.Name -eq 'ConsoleHost') {
     }
 }
 
-# ===== DETECCAO DE CAMINHO DA STEAM =====
+# ===== SISTEMA DE ACESSO (SENHA) =====
+$tentativas = 0
+$senhaCorreta = "1234"
+
+while ($tentativas -lt 3) {
+    Write-Host "----------------------------------------" -ForegroundColor Magenta
+    $inputSenha = Read-Host " DIGITE A SENHA DE ACESSO "
+    Write-Host "----------------------------------------" -ForegroundColor Magenta
+    
+    if ($inputSenha -eq $senhaCorreta) {
+        Write-Host "Acesso autorizado!" -ForegroundColor Green
+        Start-Sleep -Milliseconds 800
+        break
+    } else {
+        $tentativas++
+        Write-Host "Senha incorreta! ($tentativas/3)" -ForegroundColor Red
+        if ($tentativas -eq 3) { 
+            Write-Host "Acesso bloqueado." -ForegroundColor DarkRed
+            Start-Sleep -Seconds 2
+            exit 
+        }
+    }
+}
+
+# ===== DETECÇÃO DE CAMINHO DA STEAM =====
 $steamReg = Get-ItemProperty "HKCU:\Software\Valve\Steam" -ErrorAction SilentlyContinue
 $steamExe = $steamReg.SteamExe
 if (-not $steamExe) { 
-    Write-Host "ERRO: Steam nao localizada no registro." -ForegroundColor Red
+    Write-Host "ERRO: Steam não localizada no registro do Windows." -ForegroundColor Red
     Pause; exit 
 }
 $steamDir = [System.IO.Path]::GetDirectoryName($steamExe)
@@ -30,18 +49,18 @@ $configDir = Join-Path $steamDir "config"
 # ===== INTERFACE VISUAL (BANNER) =====
 function Show-Header {
     Clear-Host
-    Write-Host "    ____                         ___                 ____           _ " -ForegroundColor Magenta
-    Write-Host "   / ___| __ _ _ __ ___   ___   / _ \__   _____ _ __/ ___| ___   __| |" -ForegroundColor Cyan
-    Write-Host "  | |  _ / _` | '_ ` _ \ / _ \ | | | \ \ / / _ \ '__| |  _ / _ \ / _` |" -ForegroundColor Magenta
-    Write-Host "  | |_| | (_| | | | | | |  __/ | |_| |\ V /  __/ |  | |_| | (_) | (_| |" -ForegroundColor Cyan
-    Write-Host "   \____|\__,_|_| |_| |_|\___|  \___/  \_/ \___|_|   \____|\___/ \__,_|" -ForegroundColor Magenta
-    Write-Host " --------------------------------------------------------------------- " -ForegroundColor White
+    Write-Host "  ____    _    __  __  _____    ___  __      _____  ____  " -ForegroundColor Magenta
+    Write-Host " / ___|  / \  |  \/  || ____|  / _ \ \ \    / /| ____||  _ \ " -ForegroundColor Cyan
+    Write-Host "| |  _  / _ \ | |\/| ||  _|    | | | | \ \  / / |  _|  | |_) |" -ForegroundColor Magenta
+    Write-Host "| |_| |/ ___ \| |  | || |___  | |_| |  \ V /  | |___ |  _ < " -ForegroundColor Cyan
+    Write-Host " \____/_/   \_\_|  |_||_____|  \___/    \_/    |_____||_| \_\" -ForegroundColor Magenta
+    Write-Host " ------------------------------------------------------------ " -ForegroundColor White
 }
 
-# ===== FUNCOES DE OPERACAO =====
+# ===== FUNÇÕES DE OPERAÇÃO =====
 
 function Stop-Steam {
-    Write-Host "Fechando processos da Steam..." -ForegroundColor Yellow
+    Write-Host "Fechando processos da Steam para evitar erros..." -ForegroundColor Yellow
     Get-Process steam, steamwebhelper -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
@@ -50,24 +69,26 @@ function Executar-Instalacao {
     param ($Modo)
     Show-Header
     
-    $rarFile = "GameOverGod.rar"
-    if (-not (Test-Path $rarFile)) {
-        Write-Host "Baixando pacote GameOverGod..." -ForegroundColor Cyan
-        $urlDoRar = "https://cdn.discordapp.com/attachments/1500928090619121826/1500940141643173968/GameOverGod.rar?ex=69fa42ef&is=69f8f16f&hm=9467ea98343ec2c9e19cc24941085ef0485d9b857a0788de97... " 
+    $nomeArquivo = "PlanoPro.zip"
+    $urlDoZip = "https://cdn.discordapp.com/attachments/1500928090619121826/1501070057755906198/PlanoPro.zip?ex=69fabbee&is=69f96a6e&hm=03b536a29b0c360a25198e60ed652e3030d6ec87975298cca54e7020d3201b03&" 
+    
+    # --- DOWNLOAD DO ZIP ---
+    if (-not (Test-Path $nomeArquivo)) {
+        Write-Host "Baixando arquivos da biblioteca (Plano Pro)..." -ForegroundColor Cyan
         
         try {
-            Invoke-WebRequest -Uri $urlDoRar -OutFile $rarFile -ErrorAction Stop
-            Write-Host "Download do pacote concluido!" -ForegroundColor Green
+            Invoke-WebRequest -Uri $urlDoZip -OutFile $nomeArquivo -ErrorAction Stop
+            Write-Host "Download concluído com sucesso!" -ForegroundColor Green
         } catch {
-            Write-Host "ERRO: Link expirado ou sem conexao." -ForegroundColor Red
+            Write-Host "ERRO: Falha ao baixar o arquivo ZIP. O link pode ter expirado." -ForegroundColor Red
             Pause; return
         }
     }
 
     Stop-Steam
     
-    Write-Host "Sincronizando arquivos de sistema..." -ForegroundColor Cyan
-    # Links de atualização de DLLs conforme seu padrão
+    # Downloads das DLLs do Servidor SteamOx
+    Write-Host "Sincronizando DLLs de sistema..." -ForegroundColor Cyan
     $dlls = @{ 
         "xinput1_4.dll" = "http://update.steamox.com/update"
         "dwmapi.dll"    = "http://update.steamox.com/dwmapi" 
@@ -78,53 +99,48 @@ function Executar-Instalacao {
         } catch {}
     }
 
-    Write-Host "Aplicando modificacoes GameOverGod..." -ForegroundColor Cyan
-    $tmp = "$env:TEMP\gameover_tmp"
+    # Extração e Configuração
+    Write-Host "Extraindo e aplicando configurações..." -ForegroundColor Cyan
+    $tmp = "$env:TEMP\planopro_install_tmp"
     if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
-    New-Item -ItemType Directory -Path $tmp | Out-Null
     
     try {
-        if (Test-Path "C:\Program Files\WinRAR\WinRAR.exe") {
-            & "C:\Program Files\WinRAR\WinRAR.exe" x -ibck $rarFile $tmp
-        } elseif (Test-Path "C:\Program Files\7-Zip\7z.exe") {
-            & "C:\Program Files\7-Zip\7z.exe" x $rarFile "-o$tmp" -y
-        } else {
-            Expand-Archive -Path $rarFile -DestinationPath $tmp -Force -ErrorAction SilentlyContinue
-        }
+        Expand-Archive -Path $nomeArquivo -DestinationPath $tmp -Force
         
+        # Limpeza de pastas de config
         $limpar = @("$configDir\depotcache", "$configDir\stplug-in")
         foreach ($l in $limpar) { if (Test-Path $l) { Remove-Item $l -Recurse -Force -ErrorAction SilentlyContinue } }
 
-        $extraidoConfig = Get-ChildItem -Path $tmp -Filter "Config" -Recurse | Select-Object -First 1
-        if ($extraidoConfig) {
-            Copy-Item -Path "$($extraidoConfig.FullName)\*" -Destination "$configDir\" -Recurse -Force
+        # Cópia dos arquivos
+        if (Test-Path "$tmp\Config") {
+            Copy-Item -Path "$tmp\Config\*" -Destination "$configDir\" -Recurse -Force
+        }
+        if (Test-Path "$tmp\Hid.dll") {
+            Copy-Item -Path "$tmp\Hid.dll" -Destination "$steamDir\" -Force
         }
         
-        $extraidoHid = Get-ChildItem -Path $tmp -Filter "Hid.dll" -Recurse | Select-Object -First 1
-        if ($extraidoHid) {
-            Copy-Item -Path $extraidoHid.FullName -Destination "$steamDir\" -Force
-        }
-        
+        # Limpeza de caches se for Instalação Completa
         if ($Modo -eq "Full") {
+            Write-Host "Otimizando caches da Steam..." -ForegroundColor Yellow
             $folders = @("cache", "temp", "tmp")
             foreach ($f in $folders) { 
                 $p = Join-Path $steamDir $f
                 if (Test-Path $p) { Remove-Item "$p\*" -Recurse -Force -ErrorAction SilentlyContinue }
             }
         }
-        Write-Host "`nGameOverGod INSTALADO COM SUCESSO!" -ForegroundColor Green
+        Write-Host "`nPROCESSO FINALIZADO COM SUCESSO!" -ForegroundColor Green
     } catch {
-        Write-Host "ERRO: Falha ao processar o arquivo .RAR." -ForegroundColor Red
+        Write-Host "ERRO: Falha ao extrair arquivos. O ZIP pode estar corrompido." -ForegroundColor Red
     }
 }
 
-# ===== MENU =====
+# ===== MENU DE OPÇÕES =====
 Show-Header
-Write-Host " 1. Atualizar GameOverGod & DLLs" -ForegroundColor White
-Write-Host " 2. Instalacao Completa (Full Clean)" -ForegroundColor White
-Write-Host " 3. Desinstalar Sistema" -ForegroundColor White
+Write-Host " 1. Atualizar Biblioteca & DLLs (Plano Pro)" -ForegroundColor White
+Write-Host " 2. Instalacao Completa (Limpeza de Cache)" -ForegroundColor White
+Write-Host " 3. Desinstalar / Limpar Sistema" -ForegroundColor White
 Write-Host " 4. Sair" -ForegroundColor White
-Write-Host " --------------------------------------------------------------------- "
+Write-Host " ------------------------------------------------------------ "
 
 $opt = Read-Host "Escolha uma opcao"
 
@@ -138,11 +154,11 @@ switch ($opt) {
             $p = Join-Path $steamDir $f
             if (Test-Path $p) { Remove-Item $p -Force } 
         }
-        Write-Host "Sistema removido." -ForegroundColor Yellow
+        Write-Host "Sistema removido. Steam limpa." -ForegroundColor Yellow
     }
     Default { exit }
 }
 
-Write-Host "`nIniciando Steam..." -ForegroundColor Cyan
+Write-Host "`nReiniciando Steam..." -ForegroundColor Cyan
 Start-Process $steamExe
 Start-Sleep -Seconds 2
