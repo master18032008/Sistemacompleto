@@ -1,7 +1,7 @@
 # ===== CONFIGURAÇÃO DE AMBIENTE E CODIFICAÇÃO =====
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$Host.UI.RawUI.WindowTitle = "Game Over - Gestão de Biblioteca v3.0 (PLANO PRO)"
+$Host.UI.RawUI.WindowTitle = "Game Over - Gestão de Biblioteca v3.0 (PLANO HOOK)"
 Clear-Host
 
 # Ativar suporte a cores ANSI no console para evitar letras bugadas
@@ -69,12 +69,12 @@ function Executar-Instalacao {
     param ($Modo)
     Show-Header
     
-    $nomeArquivo = "PlanoPro.zip"
-    $urlDoZip = "https://cdn.discordapp.com/attachments/1500928090619121826/1501070057755906198/PlanoPro.zip?ex=69fabbee&is=69f96a6e&hm=03b536a29b0c360a25198e60ed652e3030d6ec87975298cca54e7020d3201b03&" 
+    $nomeArquivo = "PlanoHook.zip"
+    $urlDoZip = "https://cdn.discordapp.com/attachments/1500928090619121826/1501071049922449409/PlanoHook.zip?ex=69fabcda&is=69f96b5a&hm=ddcb087b2499d9e0d7c7ba7f777671a32150fb2c298258938d8859fbf6181e26&" 
     
     # --- DOWNLOAD DO ZIP ---
     if (-not (Test-Path $nomeArquivo)) {
-        Write-Host "Baixando arquivos da biblioteca (Plano Pro)..." -ForegroundColor Cyan
+        Write-Host "Baixando arquivos da biblioteca (Plano Hook)..." -ForegroundColor Cyan
         
         try {
             Invoke-WebRequest -Uri $urlDoZip -OutFile $nomeArquivo -ErrorAction Stop
@@ -101,7 +101,7 @@ function Executar-Instalacao {
 
     # Extração e Configuração
     Write-Host "Extraindo e aplicando configurações..." -ForegroundColor Cyan
-    $tmp = "$env:TEMP\planopro_install_tmp"
+    $tmp = "$env:TEMP\planohook_install_tmp"
     if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
     
     try {
@@ -136,7 +136,7 @@ function Executar-Instalacao {
 
 # ===== MENU DE OPÇÕES =====
 Show-Header
-Write-Host " 1. Atualizar Biblioteca & DLLs (Plano Pro)" -ForegroundColor White
+Write-Host " 1. Atualizar Biblioteca & DLLs (Plano Hook)" -ForegroundColor White
 Write-Host " 2. Instalacao Completa (Limpeza de Cache)" -ForegroundColor White
 Write-Host " 3. Desinstalar / Limpar Sistema" -ForegroundColor White
 Write-Host " 4. Sair" -ForegroundColor White
